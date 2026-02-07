@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Media Upload Test</title>
+  </head>
+  <body>
+    <h2>Test Media Upload</h2>
+
+    <form
+      action="http://localhost:5000/api/media"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      <input type="file" name="image" required />
+      <br /><br />
+      <button type="submit">Upload</button>
+    </form>
+  </body>
+</html>

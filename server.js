@@ -6,8 +6,6 @@ import cors from "cors";
 import mongoose from "mongoose";
 import path from "path";
 
-// 🔥 Load Cloudinary AFTER dotenv
-
 // ROUTES
 import applicationRoutes from "./routes/applicationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
@@ -18,10 +16,17 @@ import { sendEmail } from "./utils/sendEmail.js";
 
 const app = express();
 
-
-
 /* ---------------- MIDDLEWARE ---------------- */
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://reelmafamilyharvest.org",
+      "https://www.reelmafamilyharvest.org",
+    ],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));

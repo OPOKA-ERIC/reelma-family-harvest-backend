@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
-dotenv.config(); // 🔥 MUST BE FIRST — DO NOT MOVE
+dotenv.config(); // 🔥 MUST STAY FIRST
 
 import express from "express";
 import cors from "cors";
-import mongoose from "mongoose";
 import path from "path";
+import connectDB from "./config/db.js";
 
 // ROUTES
 import applicationRoutes from "./routes/applicationRoutes.js";
@@ -16,30 +16,30 @@ import { sendEmail } from "./utils/sendEmail.js";
 
 const app = express();
 
-/* ---------------- MIDDLEWARE ---------------- */
+/* ---------------- DATABASE CONNECTION ---------------- */
+connectDB();
+
+/* ---------------- CORS (FINAL PRODUCTION SAFE) ---------------- */
 app.use(
   cors({
     origin: [
       "https://reelmafamilyharvest.org",
       "https://www.reelmafamilyharvest.org",
+      "http://localhost:5173",
     ],
     credentials: true,
   })
 );
 
+/* ---------------- MIDDLEWARE ---------------- */
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-/* ---------------- DATABASE ---------------- */
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err));
-
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
-  res.send("Family Harvest Backend Running");
+  res.send("Family Harvest Backend Running ✅");
 });
 
 /* ---------------- EMAIL TEST ---------------- */
@@ -62,8 +62,6 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/media", mediaRoutes);
-
-console.log("RAW PORT VALUE:", process.env.PORT);
 
 /* ---------------- START SERVER ---------------- */
 const PORT = process.env.PORT || 5000;

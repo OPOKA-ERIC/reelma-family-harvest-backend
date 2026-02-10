@@ -14,7 +14,7 @@ export const uploadMedia = async (req, res) => {
       return res.status(400).json({ message: "No image uploaded" });
     }
 
-    // 🔥 HERO IMAGE → ONLY ONE ALLOWED
+    // HERO IMAGE → ONLY ONE ALLOWED
     if (section === "hero") {
       const existingHero = await Media.findOne({ section: "hero" });
 
@@ -34,7 +34,8 @@ export const uploadMedia = async (req, res) => {
 
     res.status(201).json(media);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Media upload error:", err);
+    res.status(500).json({ message: "Media upload failed" });
   }
 };
 
@@ -47,9 +48,11 @@ export const getMediaBySection = async (req, res) => {
   try {
     const { section } = req.params;
     const media = await Media.find({ section }).sort({ createdAt: -1 });
-    res.json(media);
+
+    res.json(media || []);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Media fetch error:", err);
+    res.status(500).json({ message: "Failed to fetch media" });
   }
 };
 
@@ -61,9 +64,10 @@ export const getMediaBySection = async (req, res) => {
 export const getHeroImage = async (req, res) => {
   try {
     const hero = await Media.findOne({ section: "hero" });
-    res.json(hero);
+    res.json(hero || null);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Hero fetch error:", err);
+    res.status(500).json({ message: "Failed to fetch hero image" });
   }
 };
 
@@ -85,6 +89,7 @@ export const deleteMedia = async (req, res) => {
 
     res.json({ message: "Media deleted successfully" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Delete media error:", err);
+    res.status(500).json({ message: "Delete failed" });
   }
 };

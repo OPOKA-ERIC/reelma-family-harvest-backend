@@ -16,9 +16,6 @@ import { sendEmail } from "./utils/sendEmail.js";
 
 const app = express();
 
-/* ---------------- DATABASE CONNECTION ---------------- */
-await connectDB();
-
 /* ---------------- CORS (FINAL SAFE CONFIG) ---------------- */
 app.use(
   cors({
@@ -63,9 +60,20 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/media", mediaRoutes);
 
-/* ---------------- START SERVER ---------------- */
-const PORT = process.env.PORT || 5000;
+/* ---------------- START SERVER AFTER DB CONNECTS ---------------- */
+const startServer = async () => {
+  try {
+    await connectDB();
+    console.log("✅ Database connected successfully");
 
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
+  } catch (error) {
+    console.error("❌ Failed to connect DB:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

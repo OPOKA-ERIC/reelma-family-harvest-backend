@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config(); // 🔥 MUST STAY FIRST
+dotenv.config(); // MUST STAY FIRST
 
 import express from "express";
 import cors from "cors";
@@ -17,9 +17,9 @@ import { sendEmail } from "./utils/sendEmail.js";
 const app = express();
 
 /* ---------------- DATABASE CONNECTION ---------------- */
-connectDB();
+await connectDB();
 
-/* ---------------- CORS (FINAL PRODUCTION SAFE) ---------------- */
+/* ---------------- CORS (FINAL SAFE CONFIG) ---------------- */
 app.use(
   cors({
     origin: [
@@ -65,6 +65,7 @@ app.use("/api/media", mediaRoutes);
 
 /* ---------------- START SERVER ---------------- */
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );

@@ -1,23 +1,19 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendEmail = async ({ to, subject, html }) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT),
-    secure: true, // ✅ REQUIRED for port 465
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  try {
+    const response = await resend.emails.send({
+      from: "Family Harvest Foundation <onboarding@resend.dev>", 
+      to,
+      subject,
+      html,
+    });
 
-  // ✅ VERIFY CONNECTION (IMPORTANT)
-  await transporter.verify();
-
-  await transporter.sendMail({
-    from: `"Family Harvest Foundation" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
+    console.log("✅ Email sent:", response);
+  } catch (error) {
+    console.error("❌ Email send error:", error);
+    throw error;
+  }
 };

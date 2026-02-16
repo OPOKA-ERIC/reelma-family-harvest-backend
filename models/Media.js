@@ -3,17 +3,17 @@ import mongoose from "mongoose";
 const mediaSchema = new mongoose.Schema(
   {
     section: {
-      type: String,
-      enum: [
-        "hero",
-        "home-programs",
-        "home-gallery",
-        "programs-projects",
-        "partners",
-        "gallery"
-      ],
-      required: true,
-    },
+  type: String,
+  enum: [
+    "hero",
+    "home-programs",
+    "home-gallery",
+    "programs-projects",
+    "partners",
+    "gallery"
+  ],
+  required: true
+  },
 
     title: {
       type: String,
@@ -25,14 +25,8 @@ const mediaSchema = new mongoose.Schema(
       default: "",
     },
 
-    mediaUrl: {
+    imageUrl: {
       type: String,
-      required: true,
-    },
-
-    mediaType: {
-      type: String,
-      enum: ["image", "video"],
       required: true,
     },
 

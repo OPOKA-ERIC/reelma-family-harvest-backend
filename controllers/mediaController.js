@@ -3,7 +3,7 @@ import cloudinary from "../config/cloudinary.js";
 
 /**
  * ===============================
- * UPLOAD MEDIA
+ * UPLOAD MEDIA (IMAGE OR VIDEO)
  * ===============================
  */
 export const uploadMedia = async (req, res) => {
@@ -11,24 +11,32 @@ export const uploadMedia = async (req, res) => {
     const { section, title = "", description = "" } = req.body;
 
     if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded" });
+      return res.status(400).json({ message: "No media uploaded" });
     }
 
-    // HERO IMAGE → ONLY ONE ALLOWED
+    // HERO MEDIA → ONLY ONE ALLOWED
     if (section === "hero") {
       const existingHero = await Media.findOne({ section: "hero" });
 
       if (existingHero) {
-        await cloudinary.uploader.destroy(existingHero.cloudinaryId);
+        await cloudinary.uploader.destroy(existingHero.cloudinaryId, {
+          resource_type:
+            existingHero.mediaType === "video" ? "video" : "image",
+        });
         await existingHero.deleteOne();
       }
     }
+
+    // Detect media type automatically
+    const mediaType =
+      req.file.mimetype?.startsWith("video") ? "video" : "image";
 
     const media = await Media.create({
       section,
       title,
       description,
-      imageUrl: req.file.path,
+      mediaUrl: req.file.path,
+      mediaType,
       cloudinaryId: req.file.filename,
     });
 
@@ -58,7 +66,7 @@ export const getMediaBySection = async (req, res) => {
 
 /**
  * ===============================
- * GET GLOBAL HERO IMAGE
+ * GET GLOBAL HERO MEDIA
  * ===============================
  */
 export const getHeroImage = async (req, res) => {
@@ -67,13 +75,13 @@ export const getHeroImage = async (req, res) => {
     res.json(hero || null);
   } catch (err) {
     console.error("Hero fetch error:", err);
-    res.status(500).json({ message: "Failed to fetch hero image" });
+    res.status(500).json({ message: "Failed to fetch hero media" });
   }
 };
 
 /**
  * ===============================
- * DELETE MEDIA
+ * DELETE MEDIA (IMAGE OR VIDEO)
  * ===============================
  */
 export const deleteMedia = async (req, res) => {
@@ -84,7 +92,10 @@ export const deleteMedia = async (req, res) => {
       return res.status(404).json({ message: "Media not found" });
     }
 
-    await cloudinary.uploader.destroy(media.cloudinaryId);
+    await cloudinary.uploader.destroy(media.cloudinaryId, {
+      resource_type: media.mediaType === "video" ? "video" : "image",
+    });
+
     await media.deleteOne();
 
     res.json({ message: "Media deleted successfully" });

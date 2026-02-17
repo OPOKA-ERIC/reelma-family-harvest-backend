@@ -14,10 +14,16 @@ const router = express.Router();
  * ===============================
  * UPLOAD MEDIA (ADMIN)
  * ===============================
- * section can be:
- * hero | programs | gallery | projects | partners
+ * Supports BOTH images and videos
+ * Field name stays "image" to avoid
+ * breaking existing frontend uploads.
  */
-router.post("/", upload.single("image"), uploadMedia);
+router.post(
+  "/",
+  protectAdmin,
+  upload.single("image"),
+  uploadMedia
+);
 
 /**
  * ===============================

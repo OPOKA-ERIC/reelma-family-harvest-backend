@@ -11,15 +11,29 @@ export const uploadMedia = async (req, res) => {
     const { section, title = "", description = "" } = req.body;
 
     if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded" });
+      return res.status(400).json({ message: "No media uploaded" });
     }
 
-    // HERO IMAGE → ONLY ONE ALLOWED
+    // Detect whether uploaded file is image or video
+    const isVideo =
+      req.file.mimetype?.startsWith("video") ||
+      req.file.resource_type === "video";
+
+    const mediaType = isVideo ? "video" : "image";
+
+    /**
+     * HERO IMAGE RULE:
+     * Only one hero allowed
+     */
     if (section === "hero") {
       const existingHero = await Media.findOne({ section: "hero" });
 
       if (existingHero) {
-        await cloudinary.uploader.destroy(existingHero.cloudinaryId);
+        await cloudinary.uploader.destroy(existingHero.cloudinaryId, {
+          resource_type:
+            existingHero.mediaType === "video" ? "video" : "image",
+        });
+
         await existingHero.deleteOne();
       }
     }
@@ -30,6 +44,7 @@ export const uploadMedia = async (req, res) => {
       description,
       imageUrl: req.file.path,
       cloudinaryId: req.file.filename,
+      mediaType, // NEW field
     });
 
     res.status(201).json(media);
@@ -47,7 +62,9 @@ export const uploadMedia = async (req, res) => {
 export const getMediaBySection = async (req, res) => {
   try {
     const { section } = req.params;
-    const media = await Media.find({ section }).sort({ createdAt: -1 });
+
+    const media = await Media.find({ section })
+      .sort({ createdAt: -1 });
 
     res.json(media || []);
   } catch (err) {
@@ -64,6 +81,7 @@ export const getMediaBySection = async (req, res) => {
 export const getHeroImage = async (req, res) => {
   try {
     const hero = await Media.findOne({ section: "hero" });
+
     res.json(hero || null);
   } catch (err) {
     console.error("Hero fetch error:", err);
@@ -84,7 +102,11 @@ export const deleteMedia = async (req, res) => {
       return res.status(404).json({ message: "Media not found" });
     }
 
-    await cloudinary.uploader.destroy(media.cloudinaryId);
+    await cloudinary.uploader.destroy(media.cloudinaryId, {
+      resource_type:
+        media.mediaType === "video" ? "video" : "image",
+    });
+
     await media.deleteOne();
 
     res.json({ message: "Media deleted successfully" });

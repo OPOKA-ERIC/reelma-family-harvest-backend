@@ -6,10 +6,22 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "family-harvest",
-    resource_type: "image",
+    resource_type: "auto",
+    allowed_formats: [
+      "jpg",
+      "jpeg",
+      "png",
+      "webp",
+      "mp4",
+      "mov",
+      "webm",
+    ],
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+});
 
 export default upload;
